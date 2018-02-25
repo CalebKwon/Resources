@@ -1,0 +1,104 @@
+####이하는 wordcloud2 실습한 예제입니다####
+
+ 
+
+library(NLP)
+
+library(tm)
+
+library(SnowballC)
+
+library(RColorBrewer)
+
+library(wordcloud)
+
+library(wordcloud2)
+
+ 
+
+d<-file(file.choose(), open="rb")
+
+data<-readLines(d,encoding="latin1")
+
+docs <- Corpus(VectorSource(data))
+
+inspect(docs)
+
+head(docs, 10)
+
+ 
+
+# Remove numbers
+
+docs <- tm_map(docs, removeNumbers)
+
+# Remove english common stopwords
+
+docs <- tm_map(docs, removeWords, stopwords("english"))
+
+# Remove punctuations
+
+docs <- tm_map(docs, removePunctuation)
+
+# Eliminate extra white spaces
+
+docs <- tm_map(docs, stripWhitespace)
+
+# Remove your own stop word
+
+# specify your stopwords as a character vector
+
+#docs <- tm_map(docs, removeWords, c("The", "the", "said", "trump", "Trump"))
+
+ 
+
+# Text stemming
+
+# docs <- tm_map(docs, stemDocument)
+
+dtm <- TermDocumentMatrix(docs)
+
+m <- as.matrix(dtm)
+
+v <- sort(rowSums(m),decreasing=TRUE)
+
+d <- data.frame(word = names(v),freq=v)
+
+ 
+
+# 삭제단어 for문.
+
+write.csv(d,"d.csv")
+
+#d에서 삭제할 단어만 남겨놓고 delete로 저장합니다
+
+delete<-readLines(file.choose())
+
+cnt_txt<-length(delete)
+
+i<-1
+
+for(i in 1:cnt_txt) {
+
+  docs <- tm_map(docs, removeWords, c(delete[i]))
+
+}
+
+ 
+
+dtm <- TermDocumentMatrix(docs)
+
+m <- as.matrix(dtm)
+
+v <- sort(rowSums(m),decreasing=TRUE)
+
+d <- data.frame(word = names(v),freq=v)
+
+ 
+
+head(d, 10)
+
+ 
+
+wordcloud2(d, size=1.6, color='random-dark')
+
